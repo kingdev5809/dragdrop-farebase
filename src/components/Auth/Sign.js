@@ -24,7 +24,6 @@ function Sign() {
     }
     navigate("/home");
   };
-  console.log(auth.currentUser);
 
   return (
     <section className="login-container">
