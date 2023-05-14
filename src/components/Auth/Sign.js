@@ -22,7 +22,7 @@ function Sign() {
     } catch (error) {
       console.log(error.message);
     }
-    navigate("/");
+    navigate("/home");
   };
   console.log(auth.currentUser);
 
