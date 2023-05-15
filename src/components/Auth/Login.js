@@ -15,7 +15,7 @@ function Login() {
     event.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        navigate("/home");
+        navigate("/");
       })
       .catch((error) => {
         console.error(error);

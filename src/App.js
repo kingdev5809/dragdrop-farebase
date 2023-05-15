@@ -5,6 +5,8 @@ import Login from "./components/Auth/Login";
 import Sign from "./components/Auth/Sign";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { auth } from "./firebase/firebase";
+import { ToastContainer } from "react-toastify";
+import "../node_modules/react-toastify/dist/ReactToastify.min.css";
 
 function App() {
   const [user, setUser] = useState("");
@@ -12,16 +14,19 @@ function App() {
     setUser(user);
   });
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/sign" element={<Sign />} />
-        <Route path="/" element={<Login />} />
-        <Route
-          path="/home"
-          element={user ? <HomePage user={user} /> : <Login />}
-        />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <ToastContainer />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/sign" element={!user ? <Sign /> : ""} />
+          <Route path="/login" element={!user ? <Login /> : ""} />
+          <Route
+            path="/"
+            element={user ? <HomePage user={user} /> : <Login />}
+          />
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 

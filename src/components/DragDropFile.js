@@ -17,14 +17,14 @@ import {
   addDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+import { toast } from "react-toastify";
 
 // drag drop file component
 export function DragDropFile({ user }) {
   // file state
 
-  const [newFiles, setNewFiles] = useState("");
+  const [files, setFiles] = useState("");
 
-  const [booleens, setBooleens] = useState(true);
   const [uploadProccess, setUploadProccess] = useState(0);
 
   // drag state
@@ -33,17 +33,16 @@ export function DragDropFile({ user }) {
   const inputRef = useRef(null);
 
   function handleFile(files) {
-    setNewFiles(files);
+    setFiles(files);
   }
 
   // upload file to farebase server
   const HandleUpload = () => {
-    if (newFiles) {
-      setBooleens(true);
+    if (files) {
       const storage = getStorage();
-      const namer = `${new Date()}_${newFiles.name}`;
+      const namer = `${new Date()}_${files.name}`;
       const storageRef = ref(storage, namer);
-      const uploadTask = uploadBytesResumable(storageRef, newFiles);
+      const uploadTask = uploadBytesResumable(storageRef, files);
 
       uploadTask.on(
         "state_changed",
@@ -59,15 +58,16 @@ export function DragDropFile({ user }) {
         },
         () => {
           // Upload completed successfully
-          console.log("Upload completed successfully");
+          toast.success("Files uploaded successfully");
+
           // Save the file URL to Cloud Firestore
           getDownloadURL(storageRef)
             .then((url) => {
               addDoc(collection(db, "files"), {
-                name: namer,
-                filename: newFiles.name,
-                url: url,
-                userId: user.uid,
+                fullname: namer,
+                name: files.name,
+                link: url,
+                user: user.uid,
               })
                 .then((docRef) => {
                   console.log(`Document written with ID: ${docRef.id}`);
@@ -81,7 +81,7 @@ export function DragDropFile({ user }) {
             });
         }
       );
-      setNewFiles("");
+      setFiles("");
     } else {
       alert("file not selected ");
     }
@@ -112,7 +112,7 @@ export function DragDropFile({ user }) {
   const handleChange = function (e) {
     e.preventDefault();
     if (e.target.files && e.target.files[0]) {
-      setNewFiles(e.target.files[0]);
+      setFiles(e.target.files[0]);
     }
   };
 
@@ -156,7 +156,7 @@ export function DragDropFile({ user }) {
         ></div>
       )}
 
-      {newFiles ? (
+      {files ? (
         <button onClick={HandleUpload} className="button-64">
           <span className="text">Upload to firebase</span>
         </button>

@@ -13,6 +13,7 @@ import {
   where,
 } from "firebase/firestore";
 import { deleteObject, getStorage, ref } from "firebase/storage";
+import { toast } from "react-toastify";
 function HomePage({ user }) {
   const [userFiles, setUserFiles] = useState([]);
   const [fileCount, setFileCount] = useState(0);
@@ -23,7 +24,7 @@ function HomePage({ user }) {
     const fetchUserFiles = async () => {
       if (user?.uid) {
         const filesRef = collection(db, "files");
-        const userFilesQuery = query(filesRef, where("userId", "==", user.uid));
+        const userFilesQuery = query(filesRef, where("user", "==", user.uid));
         const unsubscribe = onSnapshot(userFilesQuery, (snapshot) => {
           const files = snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -31,36 +32,31 @@ function HomePage({ user }) {
           }));
           setUserFiles(files);
           setFileCount(files.length);
-          console.log(files);
         });
       }
     };
     fetchUserFiles();
   }, [user?.uid]);
-  console.log(userFiles);
-  console.log(user);
 
   // delete file from database
   const handleDelete = (id, name) => {
-    var confirmed = window.confirm(`Are you sure to delete this file`);
-    if (confirmed) {
-      const storage = getStorage();
-      const storageRef = ref(storage, name);
-      deleteObject(storageRef)
-        .then(() => {
-          console.log("File deleted successfully");
-          deleteDoc(doc(db, "files", id))
-            .then(() => {
-              console.log("Document deleted successfully");
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
+    const storage = getStorage();
+    const storageRef = ref(storage, name);
+    deleteObject(storageRef)
+      .then(() => {
+        console.log("File deleted successfully");
+        toast.error("Document deleted successfully");
+        deleteDoc(doc(db, "files", id))
+          .then(() => {
+            console.log("Document deleted successfully");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   // log out the user
@@ -78,14 +74,14 @@ function HomePage({ user }) {
       <div className="files-container">
         {userFiles.map((file) => (
           <>
-            <div className="files" key={file.url}>
-              <a target="_blank" href={file.url}>
-                {file.filename}
+            <div className="files" key={file.user}>
+              <a target="_blank" href={file.link}>
+                {file.name}
               </a>
               <img
                 src={trashIcon}
                 alt="trashIcon"
-                onClick={() => handleDelete(file.id, file.name)}
+                onClick={() => handleDelete(file.id, file.fullname)}
               />
             </div>
           </>
